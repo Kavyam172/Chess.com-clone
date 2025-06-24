@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+console.log(import.meta.env.VITE_BACKEND_URL)
+
 const WS_URL = import.meta.env.VITE_BACKEND_URL || "ws://localhost:8080"
 
 export const useSocket = () => {
