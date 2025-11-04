@@ -24,14 +24,16 @@ export class Game{
             type: INIT_GAME,
             payload: {
                 color: "w",
-                opponent: this.player2
+                opponent: this.player2,
+                board: this.board.board()
             }
         }))
         this.player2.send(JSON.stringify({
             type: INIT_GAME,
             payload: {
                 color: "b",
-                opponent: this.player1
+                opponent: this.player1,
+                board: this.board.board()
             }
         }))
         this.sendTurn()
@@ -75,23 +77,37 @@ export class Game{
             return
         }
 
-        if(this.moveCount % 2 === 0){
-            this.player2.send(JSON.stringify({
-                type: MOVE,
-                payload:move
-            }))
-        }
-        else{
-            this.player1.send(JSON.stringify({
-                type: MOVE,
-                payload:move
-            }))
-        }
+        // if(this.moveCount % 2 === 0){
+        //     this.player2.send(JSON.stringify({
+        //         type: MOVE,
+        //         payload:move
+        //     }))
+        // }
+        // else{
+        //     this.player1.send(JSON.stringify({
+        //         type: MOVE,
+        //         payload:move
+        //     }))
+        // }
+
+        this.player1.send(JSON.stringify({
+            type:MOVE,
+            payload:{
+                move,
+                board: this.board.board()
+            }
+        }))
+
+        this.player2.send(JSON.stringify({
+            type:MOVE,
+            payload:{
+                move,
+                board: this.board.board()
+            }
+        }))
         this.moveCount++;
 
-        //check if the game is over
-
-        //send the updated board to both players
+        this.sendTurn()
     }
 
     sendTurn(){

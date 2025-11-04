@@ -2,8 +2,7 @@ import { Color, PieceSymbol, Square } from "chess.js";
 import { useEffect, useState } from "react";
 import { MOVE } from "../screens/Game";
 
-export const Chessboard = ({board,socket,chess,setBoard,color}:{
-    chess:any
+export const Chessboard = ({board,socket,setBoard,color}:{
     setBoard:any
     board: ({
         square: Square;
@@ -19,10 +18,8 @@ export const Chessboard = ({board,socket,chess,setBoard,color}:{
     useEffect(() => {
         if(from && to){
             socket.send(JSON.stringify({type:MOVE,payload:{move:{from,to}}}))
-            chess.move({from,to})
-            setBoard(chess.board())
-
-            console.log("Move: ", {from,to})
+            // chess.move({from,to})
+            // setBoard(chess.board())
             setFrom(null)
             setTo(null)
         }

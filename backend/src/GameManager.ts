@@ -21,7 +21,10 @@ export class GameManager{
 
     removeUser(socket: WebSocket){
         this.users = this.users.filter(user => user !== socket);
-        // stop the game here because user left
+        if(this.pendingUser===socket){
+            this.pendingUser = null;
+        }
+        //TODO end the game for this user and notify the other player that the game is over.
     }
 
     private addHandler(socket: WebSocket){

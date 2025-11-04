@@ -3,6 +3,7 @@ import { Button } from "../components/Button"
 import { Chessboard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
 import { Chess } from "chess.js"
+import Cboard from "../assets/board.png"
 
 export const INIT_GAME = "init_game"
 export const MOVE = "move"
@@ -12,7 +13,7 @@ export const GAME_OVER = "game_over"
 export const Game = () => {
     const socket = useSocket()
     const [chess,setChess] = useState(new Chess())
-    const [board,setBoard] = useState(chess.board())
+    const [board,setBoard] = useState([])
     const [started, setStarted] = useState(false)
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
@@ -26,17 +27,16 @@ export const Game = () => {
             const data = JSON.parse(event.data)
             switch (data.type) {
                 case INIT_GAME:
-                    // setChess(new Chess())
-                    setBoard(chess.board())
-                    setStarted(true)
+                    setBoard(data.payload.board)
+                    console.log("Game started with board", data.payload.board)
                     setColor(data.payload.color)
+                    setStarted(true)
                     setFindingGame(false)
                     console.log("Game started with color", data.payload.color)
                     break
                 case MOVE:
-                    const move = data.payload
-                    chess.move(move)
-                    setBoard(chess.board())
+                    const move = data.payload.move
+                    setBoard(data.payload.board)
                     console.log("Move: ", move)
                     break
                 case GAME_OVER:
@@ -58,10 +58,11 @@ export const Game = () => {
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
-                        <Chessboard color={color} chess={chess} setBoard={setBoard} socket={socket} board={board}/>
+                        {!started && <img src={Cboard} alt="chess board" className="max-w-96"/>}
+                        {started &&<Chessboard color={color} setBoard={setBoard} socket={socket} board={board}/>}
                     </div>
                     <div className="col-span-2 w-full flex justify-center bg-slate-900">
-                        <div className="pt-8">
+                        <div className= "pt-8">
                             {!started && !findingGame && <Button onClick = {() => {
                                 setFindingGame(true)
                                 socket.send(JSON.stringify({type: INIT_GAME}))

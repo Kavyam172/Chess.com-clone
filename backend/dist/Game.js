@@ -10,18 +10,26 @@ class Game {
         this.player2 = player2;
         this.board = new chess_js_1.Chess();
         this.startTime = new Date();
+        this.startGame();
+    }
+    startGame() {
         this.player1.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
-                color: "w"
+                color: "w",
+                opponent: this.player2,
+                board: this.board.board()
             }
         }));
         this.player2.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
-                color: "b"
+                color: "b",
+                opponent: this.player1,
+                board: this.board.board()
             }
         }));
+        this.sendTurn();
     }
     makeMove(socket, move) {
         //validate type of move using zod
@@ -53,21 +61,49 @@ class Game {
             }));
             return;
         }
-        if (this.moveCount % 2 === 0) {
-            this.player2.send(JSON.stringify({
-                type: messages_1.MOVE,
-                payload: move
-            }));
-        }
-        else {
-            this.player1.send(JSON.stringify({
-                type: messages_1.MOVE,
-                payload: move
-            }));
-        }
+        // if(this.moveCount % 2 === 0){
+        //     this.player2.send(JSON.stringify({
+        //         type: MOVE,
+        //         payload:move
+        //     }))
+        // }
+        // else{
+        //     this.player1.send(JSON.stringify({
+        //         type: MOVE,
+        //         payload:move
+        //     }))
+        // }
+        this.player1.send(JSON.stringify({
+            type: messages_1.MOVE,
+            payload: {
+                move,
+                board: this.board.board()
+            }
+        }));
+        this.player2.send(JSON.stringify({
+            type: messages_1.MOVE,
+            payload: {
+                move,
+                board: this.board.board()
+            }
+        }));
         this.moveCount++;
-        //check if the game is over
-        //send the updated board to both players
+        this.sendTurn();
+    }
+    sendTurn() {
+        // tell both players whose move it is
+        this.player1.send(JSON.stringify({
+            type: messages_1.TURN,
+            payload: {
+                turn: this.board.turn()
+            }
+        }));
+        this.player2.send(JSON.stringify({
+            type: messages_1.TURN,
+            payload: {
+                turn: this.board.turn()
+            }
+        }));
     }
 }
 exports.Game = Game;
