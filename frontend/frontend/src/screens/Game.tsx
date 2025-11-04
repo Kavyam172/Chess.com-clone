@@ -14,7 +14,8 @@ export const Game = () => {
     const [chess,setChess] = useState(new Chess())
     const [board,setBoard] = useState(chess.board())
     const [started, setStarted] = useState(false)
-    const [color,setColor] = useState("white")
+    const [color,setColor] = useState(null)
+    const [findingGame,setFindingGame] = useState(false)
 
     useEffect(() => {
         if (!socket) {
@@ -29,13 +30,14 @@ export const Game = () => {
                     setBoard(chess.board())
                     setStarted(true)
                     setColor(data.payload.color)
+                    setFindingGame(false)
                     console.log("Game started with color", data.payload.color)
                     break
                 case MOVE:
                     const move = data.payload
                     chess.move(move)
                     setBoard(chess.board())
-                    console.log("Move")
+                    console.log("Move: ", move)
                     break
                 case GAME_OVER:
                     console.log("Game Over")
@@ -49,7 +51,7 @@ export const Game = () => {
     }, [socket])
 
     if (!socket) {
-        return <div>Connecting...</div>
+        return <div style={{ color: "white" }}>Connecting...</div>
     }
     return (
         <div className="flex justify-center">
@@ -60,9 +62,14 @@ export const Game = () => {
                     </div>
                     <div className="col-span-2 w-full flex justify-center bg-slate-900">
                         <div className="pt-8">
-                            {!started && <Button onClick = {() => {
+                            {!started && !findingGame && <Button onClick = {() => {
+                                setFindingGame(true)
                                 socket.send(JSON.stringify({type: INIT_GAME}))
                             }}>Play</Button>}
+
+                            {
+                                findingGame && <Button onClick={() => {return;}} isDisabled={true}>Finding Game...</Button>
+                            }
 
                         </div>
                     </div>
