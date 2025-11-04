@@ -1,7 +1,7 @@
 
 import { Chess } from "chess.js";
 import { WebSocket } from "ws";
-import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
+import { GAME_OVER, INIT_GAME, MOVE, MOVE_INFO, TURN } from "./messages";
 
 export class Game{
     public player1:WebSocket
@@ -15,18 +15,26 @@ export class Game{
         this.player2 = player2;
         this.board = new Chess();
         this.startTime = new Date();
+        this.startGame()
+        
+    }
+
+    startGame(){
         this.player1.send(JSON.stringify({
             type: INIT_GAME,
             payload: {
-                color: "white"
+                color: "w",
+                opponent: this.player2
             }
         }))
         this.player2.send(JSON.stringify({
             type: INIT_GAME,
             payload: {
-                color: "black"
+                color: "b",
+                opponent: this.player1
             }
         }))
+        this.sendTurn()
     }
 
     makeMove(socket:WebSocket,move: {
@@ -55,13 +63,13 @@ export class Game{
             this.player1.send(JSON.stringify({
                 type: GAME_OVER,
                 payload:{
-                    winner: this.board.turn() === "w" ? "black" : "white"
+                    winner: this.board.turn() === "w" ? "b" : "w"
                 }
             }))
             this.player2.send(JSON.stringify({
                 type: GAME_OVER,
                 payload:{
-                    winner: this.board.turn() === "w" ? "black" : "white"
+                    winner: this.board.turn() === "w" ? "b" : "w"
                 }
             }))
             return
@@ -84,5 +92,22 @@ export class Game{
         //check if the game is over
 
         //send the updated board to both players
+    }
+
+    sendTurn(){
+        // tell both players whose move it is
+        this.player1.send(JSON.stringify({
+            type: TURN,
+            payload: {
+                turn: this.board.turn()
+            }
+        }))
+
+        this.player2.send(JSON.stringify({
+            type: TURN,
+            payload: {
+                turn: this.board.turn()
+            }
+        }))
     }
 }

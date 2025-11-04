@@ -13,13 +13,13 @@ class Game {
         this.player1.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
-                color: "white"
+                color: "w"
             }
         }));
         this.player2.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
-                color: "black"
+                color: "b"
             }
         }));
     }
@@ -42,13 +42,13 @@ class Game {
             this.player1.send(JSON.stringify({
                 type: messages_1.GAME_OVER,
                 payload: {
-                    winner: this.board.turn() === "w" ? "black" : "white"
+                    winner: this.board.turn() === "w" ? "b" : "w"
                 }
             }));
             this.player2.send(JSON.stringify({
                 type: messages_1.GAME_OVER,
                 payload: {
-                    winner: this.board.turn() === "w" ? "black" : "white"
+                    winner: this.board.turn() === "w" ? "b" : "w"
                 }
             }));
             return;
