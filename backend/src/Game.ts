@@ -1,7 +1,7 @@
 
 import { Chess } from "chess.js";
 import { WebSocket } from "ws";
-import { GAME_OVER, INIT_GAME, MOVE, MOVE_INFO, TURN } from "./messages";
+import { GAME_OVER, INIT_GAME, INVALID_MOVE, MOVE, MOVE_INFO, TURN } from "./messages";
 
 export class Game{
     public player1:WebSocket
@@ -57,7 +57,24 @@ export class Game{
             this.board.move(move)
         }
         catch(e){
-            console.log(e)
+            if(this.moveCount % 2 === 0){
+                this.player1.send(JSON.stringify({
+                    type: INVALID_MOVE,
+                    payload: {
+                        message: "Invalid move",
+                        error:e
+                    }
+                }))
+            }
+            else{
+                this.player2.send(JSON.stringify({
+                    type: INVALID_MOVE,
+                    payload: {
+                        message: "Invalid move",
+                        error:e
+                    }
+                }))
+            }
             return
         }
 

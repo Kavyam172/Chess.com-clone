@@ -43,7 +43,24 @@ class Game {
             this.board.move(move);
         }
         catch (e) {
-            console.log(e);
+            if (this.moveCount % 2 === 0) {
+                this.player1.send(JSON.stringify({
+                    type: messages_1.INVALID_MOVE,
+                    payload: {
+                        message: "Invalid move",
+                        error: e
+                    }
+                }));
+            }
+            else {
+                this.player2.send(JSON.stringify({
+                    type: messages_1.INVALID_MOVE,
+                    payload: {
+                        message: "Invalid move",
+                        error: e
+                    }
+                }));
+            }
             return;
         }
         if (this.board.isGameOver()) {

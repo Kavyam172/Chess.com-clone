@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { Button } from "../components/Button"
 import { Chessboard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
@@ -8,6 +10,7 @@ import Cboard from "../assets/board.png"
 export const INIT_GAME = "init_game"
 export const MOVE = "move"
 export const GAME_OVER = "game_over"
+export const INVALID_MOVE = "invalid_move"
 
 
 export const Game = () => {
@@ -42,6 +45,12 @@ export const Game = () => {
                 case GAME_OVER:
                     console.log("Game Over")
                     break
+                case INVALID_MOVE:
+                    console.log("Invalid Move")
+                    // display toast message
+                    toast.error("Invalid move")
+
+                    break
             }
         }
 
@@ -55,6 +64,7 @@ export const Game = () => {
     }
     return (
         <div className="flex justify-center">
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
