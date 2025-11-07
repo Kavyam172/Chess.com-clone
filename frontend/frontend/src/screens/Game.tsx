@@ -11,6 +11,7 @@ export const INIT_GAME = "init_game"
 export const MOVE = "move"
 export const GAME_OVER = "game_over"
 export const INVALID_MOVE = "invalid_move"
+export const TURN = "turn"
 
 
 export const Game = () => {
@@ -20,6 +21,7 @@ export const Game = () => {
     const [started, setStarted] = useState(false)
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
+    const [turn,setTurn] = useState(null)
 
     useEffect(() => {
         if (!socket) {
@@ -47,9 +49,11 @@ export const Game = () => {
                     break
                 case INVALID_MOVE:
                     console.log("Invalid Move")
-                    // display toast message
                     toast.error("Invalid move")
-
+                    break
+                case TURN:
+                    console.log("Turn: ", data.payload.turn)
+                    setTurn(data.payload.turn)
                     break
             }
         }
@@ -71,7 +75,7 @@ export const Game = () => {
                         {!started && <img src={Cboard} alt="chess board" className="max-w-96"/>}
                         {started &&<Chessboard color={color} setBoard={setBoard} socket={socket} board={board}/>}
                     </div>
-                    <div className="col-span-2 w-full flex justify-center bg-slate-900">
+                    <div className="col-span-2 w-full h-full flex flex-col justify-between items-center  bg-slate-900 p-10">
                         <div className= "pt-8">
                             {!started && !findingGame && <Button onClick = {() => {
                                 setFindingGame(true)
@@ -83,6 +87,11 @@ export const Game = () => {
                             }
 
                         </div>
+                        {started && <div className={`p-2 bg-slate-700 w-full flex justify-center items-center rounded-lg`}>
+                            <div className={`${turn==='w' ? 'bg-white text-black' : 'bg-black text-white'} p-2 rounded-md`}>
+                                <span>{turn===color ? "Your Turn" : "Opponent's Turn"}</span>
+                            </div>
+                        </div>}
                     </div>
                 </div>
             </div>
