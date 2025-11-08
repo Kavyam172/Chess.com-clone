@@ -6,6 +6,7 @@ import { Chessboard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
 import { Chess } from "chess.js"
 import Cboard from "../assets/board.png"
+import { Clock } from "../components/clock"
 
 export const INIT_GAME = "init_game"
 export const MOVE = "move"
@@ -22,6 +23,7 @@ export const Game = () => {
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
     const [turn,setTurn] = useState(null)
+    const [time,setTime] = useState(0)
 
     useEffect(() => {
         if (!socket) {
@@ -69,6 +71,9 @@ export const Game = () => {
     return (
         <div className="flex justify-center">
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+            <div className="clockContainer bg-slate-900 mt-8 px-4 py-2 flex flex-col justify-center">
+                <Clock started={started} initialTime={time} turn={turn} color={color}/>
+            </div>
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
