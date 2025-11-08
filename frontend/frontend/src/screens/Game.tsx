@@ -23,7 +23,7 @@ export const Game = () => {
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
     const [turn,setTurn] = useState(null)
-    const [time,setTime] = useState(0)
+    const [time,setTime] = useState(10 * 60 * 1000)
 
     useEffect(() => {
         if (!socket) {
@@ -36,7 +36,9 @@ export const Game = () => {
                 case INIT_GAME:
                     setBoard(data.payload.board)
                     console.log("Game started with board", data.payload.board)
+                    console.log('game started with time', data.payload)
                     setColor(data.payload.color)
+                    setTime(data.payload.time)
                     setStarted(true)
                     setFindingGame(false)
                     console.log("Game started with color", data.payload.color)
@@ -71,16 +73,22 @@ export const Game = () => {
     return (
         <div className="flex justify-center">
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
-            <div className="clockContainer bg-slate-900 mt-8 px-4 py-2 flex flex-col justify-center">
-                <Clock started={started} initialTime={time} turn={turn} color={color}/>
-            </div>
-            <div className="pt-8 max-w-screen-lg w-full">
-                <div className="grid grid-cols-6 gap-4 w-full">
-                    <div className="col-span-4 w-full flex justify-center">
-                        {!started && <img src={Cboard} alt="chess board" className="max-w-96"/>}
-                        {started &&<Chessboard color={color} setBoard={setBoard} socket={socket} board={board}/>}
+            <div className="pt-8 max-w-screen-lg w-full px-4">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
+                    <div className="col-span-1 md:col-span-4 w-full flex justify-center">
+                        <div className="w-full flex items-stretch gap-4 justify-between">
+                            <div className="clock-wrapper sm:w-24 md:w-36 rounded flex items-center justify-center">
+                                <div className="w-full">
+                                    <Clock started={started} initialTime={time} turn={turn} color={color}/>
+                                </div>
+                            </div>
+                            <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
+                                {!started && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
+                                {started && <div className="w-full h-full"><Chessboard color={color} setBoard={setBoard} socket={socket} board={board}/></div>}
+                            </div>
+                        </div>
                     </div>
-                    <div className="col-span-2 w-full h-full flex flex-col justify-between items-center  bg-slate-900 p-10">
+                    <div className="col-span-1 md:col-span-2 w-full h-full flex flex-col justify-between items-center bg-slate-900 p-6 md:p-10">
                         <div className= "pt-8">
                             {!started && !findingGame && <Button onClick = {() => {
                                 setFindingGame(true)

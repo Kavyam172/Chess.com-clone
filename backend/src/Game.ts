@@ -9,8 +9,6 @@ export class Game{
     public board: Chess
     private startTime: Date
     private moveCount = 0
-    private whiteTime: number
-    private blackTime: number
 
     constructor(player1:WebSocket, player2:WebSocket){
         this.player1 = player1;
@@ -18,8 +16,6 @@ export class Game{
         this.board = new Chess();
         this.startTime = new Date();
         this.startGame()
-        this.whiteTime = 10 * 60 * 1000
-        this.blackTime = 10 * 60 * 1000
         
     }
 
@@ -30,7 +26,7 @@ export class Game{
                 color: "w",
                 opponent: this.player2,
                 board: this.board.board(),
-                time: this.whiteTime
+                time: 10 * 60 * 1000
             }
         }))
         this.player2.send(JSON.stringify({
@@ -39,7 +35,7 @@ export class Game{
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time:this.blackTime
+                time:10*60*1000
             }
         }))
         this.sendTurn()

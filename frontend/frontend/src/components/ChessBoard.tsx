@@ -18,8 +18,6 @@ export const Chessboard = ({board,socket,setBoard,color}:{
     useEffect(() => {
         if(from && to){
             socket.send(JSON.stringify({type:MOVE,payload:{move:{from,to}}}))
-            // chess.move({from,to})
-            // setBoard(chess.board())
             setFrom(null)
             setTo(null)
         }
@@ -31,21 +29,21 @@ export const Chessboard = ({board,socket,setBoard,color}:{
         type: PieceSymbol;
         color: Color;
     } | null, squareRepresentation: Square) => {
+        // don't allow selecting opponent pieces as first click
         if(!from && (square?.color !== color)){
             return;
         }
-        console.log("Square Clicked>>>>>>>>>",squareRepresentation)
+        // select own piece
         if(square?.type && square.color===color && from!==squareRepresentation){
             setFrom(squareRepresentation)
             return;
         }
-        
-        
+
         if(!from){
             setFrom(squareRepresentation)
             return;
         }
-        
+
         if(from===squareRepresentation){
             setFrom(null)
             return;
@@ -53,32 +51,40 @@ export const Chessboard = ({board,socket,setBoard,color}:{
         else{
             setTo(squareRepresentation)
         }
-        
     }
-    return (
-        <div className={color==="w" || color===null?"text-white ring-4 ring-green-400":"text-white ring-4 ring-green-400 rotate-180"}>
-            {board.map((row, rowIndex) => {
-                return (
-                    <div key={rowIndex} className="flex">
-                        {row.map((square, squareIndex) => {
-                            const squareRepresentation = String.fromCharCode(97 + squareIndex) + (8-rowIndex) as Square;
-                            const isDark = (rowIndex + squareIndex) % 2 === 1;
-                            const isSelected = from === squareRepresentation;
-                            const bgClass = isSelected ? 'bg-yellow-400 ring-2 ring-yellow-300' : (isDark ? 'bg-slate-950' : 'bg-white');
 
-                            return (
-                                <div onClick={() => handleSquareClick(square, squareRepresentation)} key={squareIndex} className={`w-12 h-12 ${bgClass} text-blue-600 font-bold`}>
-                                    <div className="w-full flex justify-center items-center h-full">
-                                        <div className={color==="w" || color===null?"h-full flex justify-center flex-col":"h-full flex justify-center flex-col rotate-180"}>
-                                            <img src={`Piece_${square?.type}_Side_${square?.color}.svg`} alt="" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        })}
+    // Render as an 8x8 grid so the board fills its parent container (and matches clock height)
+    const cells: JSX.Element[] = [];
+    for (let rowIndex = 0; rowIndex < 8; rowIndex++){
+        for (let squareIndex = 0; squareIndex < 8; squareIndex++){
+            const square = board?.[rowIndex]?.[squareIndex] ?? null;
+            const squareRepresentation = String.fromCharCode(97 + squareIndex) + (8-rowIndex) as Square;
+            const isDark = (rowIndex + squareIndex) % 2 === 1;
+            const isSelected = from === squareRepresentation;
+            const bgClass = isSelected ? 'bg-yellow-400 ring-2 ring-yellow-300' : (isDark ? 'bg-slate-950' : 'bg-white');
+
+            cells.push(
+                <button
+                    key={`${rowIndex}-${squareIndex}`}
+                    onClick={() => handleSquareClick(square, squareRepresentation)}
+                    className={`w-full h-full ${bgClass} flex items-center justify-center p-0 border-0`}
+                    aria-label={`square-${squareRepresentation}`}
+                >
+                    <div className={color==="w" || color===null?"w-full h-full flex justify-center items-center":"w-full h-full flex justify-center items-center rotate-180"}>
+                        {square?.type ? (
+                            <img className="w-3/4 h-3/4 object-contain" src={`Piece_${square.type}_Side_${square.color}.svg`} alt={`${square.type}-${square.color}`} />
+                        ) : null}
                     </div>
-                )
-            })}
+                </button>
+            )
+        }
+    }
+
+    return (
+        <div className={color==="w" || color===null?"text-white ring-4 ring-green-400 w-full h-full":"text-white ring-4 ring-green-400 rotate-180 w-full h-full"}>
+            <div className="w-full h-full grid grid-cols-8 grid-rows-8 gap-0">
+                {cells}
+            </div>
         </div>
     )
 }

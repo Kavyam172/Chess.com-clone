@@ -11,6 +11,7 @@ export const Clock = ({initialTime,turn,started,color}:{
     const [blackTime, setBlackTime] = useState(initialTime)
 
     useEffect(() => {
+        console.log('initial time', initialTime)
         let interval:any
         if (started) {
             interval = setInterval(() => {

@@ -18,7 +18,8 @@ class Game {
             payload: {
                 color: "w",
                 opponent: this.player2,
-                board: this.board.board()
+                board: this.board.board(),
+                time: 10 * 60 * 1000
             }
         }));
         this.player2.send(JSON.stringify({
@@ -26,7 +27,8 @@ class Game {
             payload: {
                 color: "b",
                 opponent: this.player1,
-                board: this.board.board()
+                board: this.board.board(),
+                time: 10 * 60 * 1000
             }
         }));
         this.sendTurn();
