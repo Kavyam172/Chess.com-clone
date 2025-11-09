@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-console.log(import.meta.env)
-
 const WS_URL = import.meta.env.VITE_BACKEND_URL
 
 export const useSocket = () => {
