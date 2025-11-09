@@ -4,7 +4,6 @@ import 'react-toastify/dist/ReactToastify.css'
 import { Button } from "../components/Button"
 import { Chessboard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
-import { Chess } from "chess.js"
 import Cboard from "../assets/board.png"
 import { Clock } from "../components/clock"
 
@@ -17,7 +16,6 @@ export const TURN = "turn"
 
 export const Game = () => {
     const socket = useSocket()
-    const [chess,setChess] = useState(new Chess())
     const [board,setBoard] = useState([])
     const [started, setStarted] = useState(false)
     const [color,setColor] = useState(null)
@@ -84,7 +82,7 @@ export const Game = () => {
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
                                 {!started && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
-                                {started && <div className="w-full h-full"><Chessboard color={color} setBoard={setBoard} socket={socket} board={board}/></div>}
+                                {started && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board}/></div>}
                             </div>
                         </div>
                     </div>
