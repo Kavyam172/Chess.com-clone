@@ -99,7 +99,7 @@ export class Game{
                 this.sendGameOver(true,message)
             }
             else if(this.board.isCheckmate()){
-                this.sendGameOver(false,"Checkmate")
+                this.sendGameOver(false,"by Checkmate")
             }
         }
 
@@ -187,5 +187,23 @@ export class Game{
                 }
             }))
         }
+    }
+
+    handleTimeout(data:{player:string}){
+        this.player1.send(JSON.stringify({
+            type: GAME_OVER,
+            payload: {
+                winner: data.player==='w'?'b':'w',
+                message:"by Timeout"
+            }
+        }))
+
+        this.player2.send(JSON.stringify({
+            type: GAME_OVER,
+            payload: {
+                winner: data.player==='b'?'w':'b',
+                message:"by Timeout"
+            }
+        }))
     }
 }

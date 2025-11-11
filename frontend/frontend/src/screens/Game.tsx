@@ -13,6 +13,7 @@ export const MOVE = "move"
 export const GAME_OVER = "game_over"
 export const INVALID_MOVE = "invalid_move"
 export const TURN = "turn"
+export const TIMEOUT = "timeout"
 
 
 export const Game = () => {
@@ -23,7 +24,7 @@ export const Game = () => {
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
     const [turn,setTurn] = useState(null)
-    const [time,setTime] = useState(10 * 60 * 1000)
+    const [time,setTime] = useState(0.1 * 60 * 1000)
     const [gameOver,setGameOver] = useState(false)
     const [isDraw,setDraw] = useState(false)
     const [winner,setWinner] = useState(null)
@@ -106,7 +107,7 @@ export const Game = () => {
                         <div className="w-full flex items-stretch gap-4 justify-between">
                             <div className="clock-wrapper sm:w-24 md:w-36 rounded flex items-center justify-center">
                                 <div className="w-full">
-                                    <Clock ref={clockRef} started={started} initialTime={time} turn={turn} color={color}/>
+                                    <Clock ref={clockRef} started={started} initialTime={time} turn={turn} color={color} socket={socket}/>
                                 </div>
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">

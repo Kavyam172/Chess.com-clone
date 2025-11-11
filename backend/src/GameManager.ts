@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { INIT_GAME, MOVE } from "./messages";
+import { INIT_GAME, MOVE, TIMEOUT } from "./messages";
 import { Game } from "./Game";
 
 
@@ -51,6 +51,14 @@ export class GameManager{
                 const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
                 if(game){
                     game.makeMove(socket, message.payload.move);
+                }
+            }
+
+            if(message.type === TIMEOUT){
+                const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+
+                if(game){
+                    game.handleTimeout(message.payload);
                 }
             }
 

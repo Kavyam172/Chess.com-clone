@@ -83,7 +83,7 @@ class Game {
                 this.sendGameOver(true, message);
             }
             else if (this.board.isCheckmate()) {
-                this.sendGameOver(false, "Checkmate");
+                this.sendGameOver(false, "by Checkmate");
             }
         }
         // if(this.moveCount % 2 === 0){
@@ -163,6 +163,22 @@ class Game {
                 }
             }));
         }
+    }
+    handleTimeout(data) {
+        this.player1.send(JSON.stringify({
+            type: messages_1.GAME_OVER,
+            payload: {
+                winner: data.player,
+                message: "by Timeout"
+            }
+        }));
+        this.player2.send(JSON.stringify({
+            type: messages_1.GAME_OVER,
+            payload: {
+                winner: data.player,
+                message: "by Timeout"
+            }
+        }));
     }
 }
 exports.Game = Game;

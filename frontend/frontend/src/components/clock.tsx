@@ -1,10 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
+import { GAME_OVER, TIMEOUT } from "../screens/Game"
 
-export const Clock = forwardRef(({initialTime,turn,started,color}:{
+export const Clock = forwardRef(({initialTime,turn,started,color,socket}:{
     initialTime: number,
     turn:string | null,
     started:boolean,
-    color:string | null
+    color:string | null,
+    socket:WebSocket
 },ref) => {
 
     const [whiteTime, setWhiteTime] = useState(initialTime)
@@ -33,10 +35,25 @@ export const Clock = forwardRef(({initialTime,turn,started,color}:{
         } else {
             clearInterval(interval)
         }
+
+        
+
         return () => clearInterval(interval)
     }, [turn, started])
 
+    useEffect(() => {
+        if (whiteTime === 0 || blackTime === 0) {
+            socket.send(JSON.stringify({ 
+                type: TIMEOUT,
+                payload: {
+                    player: whiteTime === 0 ? 'w' : 'b'
+                }
+            }))
+        }
+    }, [whiteTime, blackTime])
+
     const formatTime = (time:number) => {
+        
         const minutes = Math.floor(time / 60000)
         const seconds = ((time % 60000) / 1000)
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
