@@ -81,19 +81,26 @@ export class Game{
         }
 
         if(this.board.isGameOver()){
-            this.player1.send(JSON.stringify({
-                type: GAME_OVER,
-                payload:{
-                    winner: this.board.turn() === "w" ? "b" : "w"
+            if(this.board.isDraw()){
+                let message:string = "";
+                if(this.board.isDrawByFiftyMoves()){
+                    message = "by Fifty moves rule"
                 }
-            }))
-            this.player2.send(JSON.stringify({
-                type: GAME_OVER,
-                payload:{
-                    winner: this.board.turn() === "w" ? "b" : "w"
+                if(this.board.isInsufficientMaterial()){
+                    message = "by Insufficient Material"
                 }
-            }))
-            return
+                if(this.board.isThreefoldRepetition()){
+                    message = "by Threefold Repetition"
+                }
+                if(this.board.isStalemate()){
+                    message = "by Stalemate"
+                }
+
+                this.sendGameOver(true,message)
+            }
+            else if(this.board.isCheckmate()){
+                this.sendGameOver(false,"Checkmate")
+            }
         }
 
         // if(this.moveCount % 2 === 0){
@@ -144,5 +151,41 @@ export class Game{
                 turn: this.board.turn()
             }
         }))
+    }
+
+    sendGameOver(isDraw:boolean = false,message:string = ""){
+        if(isDraw){
+            this.player1.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    isDraw,
+                    message,
+                }
+            }))
+            this.player2.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    isDraw,
+                    message
+                }
+            }))
+        }
+
+        else {
+            this.player1.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    winner: this.board.turn() === 'w' ? 'b' : 'w',
+                    message
+                }
+            }))
+            this.player2.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    winner: this.board.turn() === 'b' ? 'w' : 'b',
+                    message
+                }
+            }))
+        }
     }
 }

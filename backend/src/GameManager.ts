@@ -20,11 +20,17 @@ export class GameManager{
     }
 
     removeUser(socket: WebSocket){
+        const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+        if(game){
+            game.sendGameOver(false, "User left the game");
+        }
+        this.games = this.games.filter(game => game.player1 !== socket && game.player2 !== socket);
         this.users = this.users.filter(user => user !== socket);
+
         if(this.pendingUser===socket){
             this.pendingUser = null;
         }
-        //TODO end the game for this user and notify the other player that the game is over.
+
     }
 
     private addHandler(socket: WebSocket){

@@ -3,6 +3,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { Button } from "../components/Button"
 import { Chessboard } from "../components/ChessBoard"
+import { GameOver } from "../components/GameOver"
 import { useSocket } from "../hooks/useSocket"
 import Cboard from "../assets/board.png"
 import { Clock } from "../components/clock"
@@ -22,6 +23,10 @@ export const Game = () => {
     const [findingGame,setFindingGame] = useState(false)
     const [turn,setTurn] = useState(null)
     const [time,setTime] = useState(10 * 60 * 1000)
+    const [gameOver,setGameOver] = useState(false)
+    const [isDraw,setDraw] = useState(false)
+    const [winner,setWinner] = useState(null)
+    const [gameOverMessage,setGameOverMessage] = useState(null)
 
     useEffect(() => {
         if (!socket) {
@@ -47,10 +52,14 @@ export const Game = () => {
                     console.log("Move: ", move)
                     break
                 case GAME_OVER:
-                    console.log("Game Over")
+                    console.log("Game Over", data.payload)
+                    // payload expected: { isDraw?: boolean, winner?: 'w'|'b'|string, message?: string }
+                    setGameOver(true)
+                    setDraw(data.payload?.isDraw)
+                    setWinner(data.payload?.winner ?? null)
+                    setGameOverMessage(data.payload?.message)
                     break
                 case INVALID_MOVE:
-                    console.log("Invalid Move")
                     toast.error("Invalid move")
                     break
                 case TURN:
@@ -71,6 +80,18 @@ export const Game = () => {
     return (
         <div className="flex justify-center">
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+            <GameOver
+                isOpen={gameOver}
+                isDraw={isDraw}
+                winner={winner}
+                message={gameOverMessage}
+                onNewGame={() => {
+                    setFindingGame(true)
+                    socket.send(JSON.stringify({ type: INIT_GAME }))
+                    setGameOver(false)
+                }}
+                onClose={() => setGameOver(false)}
+            />
             <div className="pt-8 max-w-screen-lg w-full px-4">
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 w-full">
                     <div className="col-span-1 md:col-span-4 w-full flex justify-center">
@@ -82,7 +103,7 @@ export const Game = () => {
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
                                 {!started && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
-                                {started && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board}/></div>}
+                                {started && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} setBoard={setBoard}/></div>}
                             </div>
                         </div>
                     </div>

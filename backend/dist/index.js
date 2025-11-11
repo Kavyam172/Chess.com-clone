@@ -7,5 +7,5 @@ const gameManager = new GameManager_1.GameManager();
 wss.on('listening', () => console.log("Listening on port 8080"));
 wss.on('connection', function connection(ws) {
     gameManager.addUser(ws);
-    ws.on("disconnect", () => gameManager.removeUser(ws));
+    ws.on("close", () => gameManager.removeUser(ws));
 });

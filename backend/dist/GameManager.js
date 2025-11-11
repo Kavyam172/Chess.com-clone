@@ -14,11 +14,16 @@ class GameManager {
         this.addHandler(socket);
     }
     removeUser(socket) {
+        console.log("Removing user due to disconnection", socket);
+        const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+        if (game) {
+            game.sendGameOver(false, "User left the game");
+        }
+        this.games = this.games.filter(game => game.player1 !== socket && game.player2 !== socket);
         this.users = this.users.filter(user => user !== socket);
         if (this.pendingUser === socket) {
             this.pendingUser = null;
         }
-        //TODO end the game for this user and notify the other player that the game is over.
     }
     addHandler(socket) {
         socket.on('message', (data) => {
