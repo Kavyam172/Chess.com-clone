@@ -1,14 +1,23 @@
-import { useEffect, useState } from "react"
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
 
-export const Clock = ({initialTime,turn,started,color}:{
+export const Clock = forwardRef(({initialTime,turn,started,color}:{
     initialTime: number,
     turn:string | null,
     started:boolean,
     color:string | null
-}) => {
+},ref) => {
 
     const [whiteTime, setWhiteTime] = useState(initialTime)
     const [blackTime, setBlackTime] = useState(initialTime)
+
+    // add a handler for reset
+
+    useImperativeHandle(ref, () => ({
+        reset: () => {
+            setWhiteTime(initialTime)
+            setBlackTime(initialTime)
+        }
+    }))
 
     useEffect(() => {
         console.log('initial time', initialTime)
@@ -44,6 +53,6 @@ export const Clock = ({initialTime,turn,started,color}:{
                     <span>{formatTime(whiteTime)}</span>
                 </div>
             </div>
-        </div>
+     </div>
     )
-}
+})
