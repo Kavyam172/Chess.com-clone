@@ -1,9 +1,9 @@
 
 import { Chess } from "chess.js";
-import { WebSocket } from "ws";
+import { EventEmitter, WebSocket } from "ws";
 import { GAME_OVER, INIT_GAME, INVALID_MOVE, MOVE, MOVE_INFO, TURN } from "./messages";
 
-export class Game{
+export class Game extends EventEmitter{
     public player1:WebSocket
     public player2:WebSocket
     public board: Chess
@@ -11,12 +11,12 @@ export class Game{
     private moveCount = 0
 
     constructor(player1:WebSocket, player2:WebSocket){
+        super();
         this.player1 = player1;
         this.player2 = player2;
         this.board = new Chess();
         this.startTime = new Date();
         this.startGame()
-        
     }
 
     startGame(){
@@ -39,6 +39,7 @@ export class Game{
             }
         }))
         this.sendTurn()
+        this.emit('gameStarted')
     }
 
     makeMove(socket:WebSocket,move: {
@@ -187,6 +188,8 @@ export class Game{
                 }
             }))
         }
+
+        this.emit('gameOver',this.player1,this.player2)
     }
 
     handleTimeout(data:{player:string}){
@@ -205,5 +208,7 @@ export class Game{
                 message:"by Timeout"
             }
         }))
+
+        this.emit('gameOver',this.player1,this.player2)
     }
 }

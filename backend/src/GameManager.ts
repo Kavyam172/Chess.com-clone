@@ -14,6 +14,13 @@ export class GameManager{
         this.users = [];
     }
 
+    handleGameEvents(game:Game){
+        game.on('gameOver', (player1, player2) => {
+            console.log(">>>>>>>>>>>Game Over");
+            this.games = this.games.filter(game => game.player1 !== player1 && game.player2 !== player2);
+        })
+    }
+
     addUser(socket: WebSocket){
         this.users.push(socket);
         this.addHandler(socket);
@@ -40,6 +47,7 @@ export class GameManager{
                 if(this.pendingUser){
                     const game = new Game(this.pendingUser, socket);
                     this.games.push(game);
+                    this.handleGameEvents(game);
                     this.pendingUser = null;
                 }
                 else{

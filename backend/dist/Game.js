@@ -2,9 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Game = void 0;
 const chess_js_1 = require("chess.js");
+const ws_1 = require("ws");
 const messages_1 = require("./messages");
-class Game {
+class Game extends ws_1.EventEmitter {
     constructor(player1, player2) {
+        super();
         this.moveCount = 0;
         this.player1 = player1;
         this.player2 = player2;
@@ -19,7 +21,8 @@ class Game {
                 color: "w",
                 opponent: this.player2,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                time: 10 * 60 * 1000,
+                startTime: this.startTime
             }
         }));
         this.player2.send(JSON.stringify({
@@ -28,10 +31,12 @@ class Game {
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                time: 10 * 60 * 1000,
+                startTime: this.startTime
             }
         }));
         this.sendTurn();
+        this.emit('gameStarted');
     }
     makeMove(socket, move) {
         //validate type of move using zod
@@ -163,22 +168,24 @@ class Game {
                 }
             }));
         }
+        this.emit('gameOver', this.player1, this.player2);
     }
     handleTimeout(data) {
         this.player1.send(JSON.stringify({
             type: messages_1.GAME_OVER,
             payload: {
-                winner: data.player,
+                winner: data.player === 'w' ? 'b' : 'w',
                 message: "by Timeout"
             }
         }));
         this.player2.send(JSON.stringify({
             type: messages_1.GAME_OVER,
             payload: {
-                winner: data.player,
+                winner: data.player === 'b' ? 'w' : 'b',
                 message: "by Timeout"
             }
         }));
+        this.emit('gameOver', this.player1, this.player2);
     }
 }
 exports.Game = Game;

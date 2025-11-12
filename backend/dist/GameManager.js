@@ -9,6 +9,12 @@ class GameManager {
         this.pendingUser = null;
         this.users = [];
     }
+    handleGameEvents(game) {
+        game.on('gameOver', (player1, player2) => {
+            console.log(">>>>>>>>>>>Game Over");
+            this.games = this.games.filter(game => game.player1 !== player1 && game.player2 !== player2);
+        });
+    }
     addUser(socket) {
         this.users.push(socket);
         this.addHandler(socket);
@@ -31,6 +37,7 @@ class GameManager {
                 if (this.pendingUser) {
                     const game = new Game_1.Game(this.pendingUser, socket);
                     this.games.push(game);
+                    this.handleGameEvents(game);
                     this.pendingUser = null;
                 }
                 else {
