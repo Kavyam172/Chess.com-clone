@@ -21,8 +21,7 @@ class Game extends ws_1.EventEmitter {
                 color: "w",
                 opponent: this.player2,
                 board: this.board.board(),
-                time: 10 * 60 * 1000,
-                startTime: this.startTime
+                time: 10 * 60 * 1000
             }
         }));
         this.player2.send(JSON.stringify({
@@ -31,8 +30,7 @@ class Game extends ws_1.EventEmitter {
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time: 10 * 60 * 1000,
-                startTime: this.startTime
+                time: 10 * 60 * 1000
             }
         }));
         this.sendTurn();
@@ -103,18 +101,29 @@ class Game extends ws_1.EventEmitter {
         //         payload:move
         //     }))
         // }
+        let check = null;
+        if (this.board.isCheck()) {
+            if (this.board.turn() === "w") {
+                check = this.board.findPiece({ type: "k", color: "w" });
+            }
+            else {
+                check = this.board.findPiece({ type: "k", color: "b" });
+            }
+        }
         this.player1.send(JSON.stringify({
             type: messages_1.MOVE,
             payload: {
                 move,
-                board: this.board.board()
+                board: this.board.board(),
+                check
             }
         }));
         this.player2.send(JSON.stringify({
             type: messages_1.MOVE,
             payload: {
                 move,
-                board: this.board.board()
+                board: this.board.board(),
+                check
             }
         }));
         this.moveCount++;

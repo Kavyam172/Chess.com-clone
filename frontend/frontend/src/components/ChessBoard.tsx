@@ -2,7 +2,7 @@ import { Color, PieceSymbol, Square } from "chess.js";
 import { useEffect, useState } from "react";
 import { MOVE } from "../screens/Game";
 
-export const Chessboard = ({board,socket,setBoard,color}:{
+export const Chessboard = ({board,socket,setBoard,color,check}:{
     board: ({
         square: Square;
         type: PieceSymbol;
@@ -11,6 +11,7 @@ export const Chessboard = ({board,socket,setBoard,color}:{
     socket: WebSocket
     setBoard?: any
     color: any
+    check: string | null
 }) => {
     const [from, setFrom] = useState<Square | null>(null)
     const [to, setTo] = useState<Square | null>(null)
@@ -61,7 +62,7 @@ export const Chessboard = ({board,socket,setBoard,color}:{
             const squareRepresentation = String.fromCharCode(97 + squareIndex) + (8-rowIndex) as Square;
             const isDark = (rowIndex + squareIndex) % 2 === 1;
             const isSelected = from === squareRepresentation;
-            const bgClass = isSelected ? 'bg-yellow-400 ring-2 ring-yellow-300' : (isDark ? 'bg-slate-950' : 'bg-white');
+            const bgClass = isSelected ? 'bg-yellow-400 ring-2 ring-yellow-300' : (check==squareRepresentation ? 'bg-red-400 ring-2 ring-red-300' : (isDark ? 'bg-black' : 'bg-white'));
 
             cells.push(
                 <button

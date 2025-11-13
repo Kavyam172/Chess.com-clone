@@ -117,11 +117,22 @@ export class Game extends EventEmitter{
         //     }))
         // }
 
+        let check = null;
+        if(this.board.isCheck()){  
+            if(this.board.turn() === "w"){
+                check = this.board.findPiece({ type: "k", color: "w" })
+            }
+            else{
+                check = this.board.findPiece({ type: "k", color: "b" })
+            }
+        }
+
         this.player1.send(JSON.stringify({
             type:MOVE,
             payload:{
                 move,
-                board: this.board.board()
+                board: this.board.board(),
+                check
             }
         }))
 
@@ -129,7 +140,8 @@ export class Game extends EventEmitter{
             type:MOVE,
             payload:{
                 move,
-                board: this.board.board()
+                board: this.board.board(),
+                check
             }
         }))
         this.moveCount++;

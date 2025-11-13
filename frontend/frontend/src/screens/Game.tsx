@@ -20,11 +20,12 @@ export const Game = () => {
     const socket = useSocket()
     const clockRef = useRef<any>(null)
     const [board,setBoard] = useState([])
+    const [check,setCheck] = useState(null)
     const [started, setStarted] = useState(false)
     const [color,setColor] = useState(null)
     const [findingGame,setFindingGame] = useState(false)
     const [turn,setTurn] = useState(null)
-    const [time,setTime] = useState(0.1 * 60 * 1000)
+    const [time,setTime] = useState(10 * 60 * 1000)
     const [gameOver,setGameOver] = useState(false)
     const [isDraw,setDraw] = useState(false)
     const [winner,setWinner] = useState(null)
@@ -50,11 +51,13 @@ export const Game = () => {
                     setTime(data.payload.time)
                     setStarted(true)
                     setFindingGame(false)
+                    setCheck(null)
                     console.log("Game started with color", data.payload.color)
                     break
                 case MOVE:
                     const move = data.payload.move
                     setBoard(data.payload.board)
+                    setCheck(data.payload.check)
                     console.log("Move: ", move)
                     break
                 case GAME_OVER:
@@ -96,7 +99,6 @@ export const Game = () => {
                     socket.send(JSON.stringify({ type: INIT_GAME }))
                     setGameOver(false)
                     setStarted(false)
-                    setColor(null)
                     handleClockReset()
                 }}
                 onClose={() => setGameOver(false)}
@@ -112,7 +114,7 @@ export const Game = () => {
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
                                 {(board.length===0) && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
-                                {(board.length>0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} setBoard={setBoard}/></div>}
+                                {(board.length>0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} setBoard={setBoard} check={check}/></div>}
                             </div>
                         </div>
                     </div>
