@@ -2,7 +2,7 @@ import { Color, PieceSymbol, Square } from "chess.js";
 import { useEffect, useState } from "react";
 import { MOVE } from "../screens/Game";
 
-export const Chessboard = ({board,socket,setBoard,color,check}:{
+export const Chessboard = ({board,socket,color,check}:{
     board: ({
         square: Square;
         type: PieceSymbol;

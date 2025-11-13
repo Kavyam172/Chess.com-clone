@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
-import { GAME_OVER, TIMEOUT } from "../screens/Game"
+import { TIMEOUT } from "../screens/Game"
 
 export const Clock = forwardRef(({initialTime,turn,started,color,socket}:{
     initialTime: number,

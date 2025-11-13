@@ -114,7 +114,7 @@ export const Game = () => {
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
                                 {(board.length===0) && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
-                                {(board.length>0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} setBoard={setBoard} check={check}/></div>}
+                                {(board.length>0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} check={check}/></div>}
                             </div>
                         </div>
                     </div>
