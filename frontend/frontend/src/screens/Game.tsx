@@ -19,17 +19,17 @@ export const TIMEOUT = "timeout"
 export const Game = () => {
     const socket = useSocket()
     const clockRef = useRef<any>(null)
-    const [board,setBoard] = useState([])
-    const [check,setCheck] = useState(null)
+    const [board, setBoard] = useState([])
+    const [check, setCheck] = useState(null)
     const [started, setStarted] = useState(false)
-    const [color,setColor] = useState(null)
-    const [findingGame,setFindingGame] = useState(false)
-    const [turn,setTurn] = useState(null)
-    const [time,setTime] = useState(10 * 60 * 1000)
-    const [gameOver,setGameOver] = useState(false)
-    const [isDraw,setDraw] = useState(false)
-    const [winner,setWinner] = useState(null)
-    const [gameOverMessage,setGameOverMessage] = useState(null)
+    const [color, setColor] = useState(null)
+    const [findingGame, setFindingGame] = useState(false)
+    const [turn, setTurn] = useState(null)
+    const [time, setTime] = useState(10 * 60 * 1000)
+    const [gameOver, setGameOver] = useState(false)
+    const [isDraw, setDraw] = useState(false)
+    const [winner, setWinner] = useState(null)
+    const [gameOverMessage, setGameOverMessage] = useState(null)
 
     const handleClockReset = () => {
         clockRef.current?.reset()
@@ -69,6 +69,7 @@ export const Game = () => {
                     setStarted(false)
                     break
                 case INVALID_MOVE:
+                    console.log(">>>> invalid move me hhh", data.payload.error)
                     toast.error("Invalid move")
                     break
                 case TURN:
@@ -109,30 +110,30 @@ export const Game = () => {
                         <div className="w-full flex items-stretch gap-4 justify-between">
                             <div className="clock-wrapper sm:w-24 md:w-36 rounded flex items-center justify-center">
                                 <div className="w-full">
-                                    <Clock ref={clockRef} started={started} initialTime={time} turn={turn} color={color} socket={socket}/>
+                                    <Clock ref={clockRef} started={started} initialTime={time} turn={turn} color={color} socket={socket} />
                                 </div>
                             </div>
                             <div className="board-wrapper w-64 sm:w-80 md:w-full aspect-square flex justify-center">
-                                {(board.length===0) && <img src={Cboard} alt="chess board" className="w-full h-full object-contain"/>}
-                                {(board.length>0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} check={check}/></div>}
+                                {(board.length === 0) && <img src={Cboard} alt="chess board" className="w-full h-full object-contain" />}
+                                {(board.length > 0) && <div className="w-full h-full"><Chessboard color={color} socket={socket} board={board} check={check} /></div>}
                             </div>
                         </div>
                     </div>
                     <div className="col-span-1 md:col-span-2 w-full h-full flex flex-col justify-between items-center bg-slate-900 p-6 md:p-10">
-                        <div className= "pt-8">
-                            {!started && !findingGame && <Button onClick = {() => {
+                        <div className="pt-8">
+                            {!started && !findingGame && <Button onClick={() => {
                                 setFindingGame(true)
-                                socket.send(JSON.stringify({type: INIT_GAME}))
+                                socket.send(JSON.stringify({ type: INIT_GAME }))
                             }}>Play</Button>}
 
                             {
-                                findingGame && <Button onClick={() => {return;}} isDisabled={true}>Finding Game...</Button>
+                                findingGame && <Button onClick={() => { return; }} isDisabled={true}>Finding Game...</Button>
                             }
 
                         </div>
                         {started && <div className={`p-2 bg-slate-700 w-full flex justify-center items-center rounded-lg`}>
-                            <div className={`${turn==='w' ? 'bg-white text-black' : 'bg-black text-white'} p-2 rounded-md`}>
-                                <span>{turn===color ? "Your Turn" : "Opponent's Turn"}</span>
+                            <div className={`${turn === 'w' ? 'bg-white text-black' : 'bg-black text-white'} p-2 rounded-md`}>
+                                <span>{turn === color ? "Your Turn" : "Opponent's Turn"}</span>
                             </div>
                         </div>}
                     </div>

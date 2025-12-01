@@ -3,14 +3,14 @@ import { Chess } from "chess.js";
 import { EventEmitter, WebSocket } from "ws";
 import { GAME_OVER, INIT_GAME, INVALID_MOVE, MOVE, MOVE_INFO, TURN } from "./messages";
 
-export class Game extends EventEmitter{
-    public player1:WebSocket
-    public player2:WebSocket
+export class Game extends EventEmitter {
+    public player1: WebSocket
+    public player2: WebSocket
     public board: Chess
     private startTime: Date
     private moveCount = 0
 
-    constructor(player1:WebSocket, player2:WebSocket){
+    constructor(player1: WebSocket, player2: WebSocket) {
         super();
         this.player1 = player1;
         this.player2 = player2;
@@ -19,7 +19,7 @@ export class Game extends EventEmitter{
         this.startGame()
     }
 
-    startGame(){
+    startGame() {
         this.player1.send(JSON.stringify({
             type: INIT_GAME,
             payload: {
@@ -35,72 +35,77 @@ export class Game extends EventEmitter{
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time:10*60*1000
+                time: 10 * 60 * 1000
             }
         }))
         this.sendTurn()
         this.emit('gameStarted')
     }
 
-    makeMove(socket:WebSocket,move: {
+    makeMove(socket: WebSocket, move: {
         from: string,
-        to: string
-    }){
+        to: string,
+        promotion?: string
+    }) {
         //validate type of move using zod
 
-        if(this.moveCount % 2 === 0 && socket !== this.player1){
+        if (this.moveCount % 2 === 0 && socket !== this.player1) {
             return
         }
 
-        if(this.moveCount % 2 === 1 && socket !== this.player2){
+        if (this.moveCount % 2 === 1 && socket !== this.player2) {
             return
         }
 
-        try{
+        try {
+            console.log("?????????????making move", move)
             this.board.move(move)
         }
-        catch(e){
-            if(this.moveCount % 2 === 0){
+        catch (e) {
+            console.log("Invalid move", e)
+            if (this.moveCount % 2 === 0) {
                 this.player1.send(JSON.stringify({
                     type: INVALID_MOVE,
                     payload: {
                         message: "Invalid move",
-                        error:e
+                        error: e
                     }
                 }))
+                console.log('invalid move msg sent')
             }
-            else{
+            else {
                 this.player2.send(JSON.stringify({
                     type: INVALID_MOVE,
                     payload: {
                         message: "Invalid move",
-                        error:e
+                        error: e
                     }
                 }))
+                console.log('invalid move msg sent')
             }
             return
         }
 
-        if(this.board.isGameOver()){
-            if(this.board.isDraw()){
-                let message:string = "";
-                if(this.board.isDrawByFiftyMoves()){
+        if (this.board.isGameOver()) {
+            if (this.board.isDraw()) {
+                let message: string = "";
+                if (this.board.isDrawByFiftyMoves()) {
                     message = "by Fifty moves rule"
                 }
-                if(this.board.isInsufficientMaterial()){
+                if (this.board.isInsufficientMaterial()) {
                     message = "by Insufficient Material"
                 }
-                if(this.board.isThreefoldRepetition()){
+                if (this.board.isThreefoldRepetition()) {
                     message = "by Threefold Repetition"
                 }
-                if(this.board.isStalemate()){
+                if (this.board.isStalemate()) {
                     message = "by Stalemate"
                 }
 
-                this.sendGameOver(true,message)
+                this.sendGameOver(true, message)
             }
-            else if(this.board.isCheckmate()){
-                this.sendGameOver(false,"by Checkmate")
+            else if (this.board.isCheckmate()) {
+                this.sendGameOver(false, "by Checkmate")
             }
         }
 
@@ -118,18 +123,18 @@ export class Game extends EventEmitter{
         // }
 
         let check = null;
-        if(this.board.isCheck()){  
-            if(this.board.turn() === "w"){
+        if (this.board.isCheck()) {
+            if (this.board.turn() === "w") {
                 check = this.board.findPiece({ type: "k", color: "w" })
             }
-            else{
+            else {
                 check = this.board.findPiece({ type: "k", color: "b" })
             }
         }
 
         this.player1.send(JSON.stringify({
-            type:MOVE,
-            payload:{
+            type: MOVE,
+            payload: {
                 move,
                 board: this.board.board(),
                 check
@@ -137,8 +142,8 @@ export class Game extends EventEmitter{
         }))
 
         this.player2.send(JSON.stringify({
-            type:MOVE,
-            payload:{
+            type: MOVE,
+            payload: {
                 move,
                 board: this.board.board(),
                 check
@@ -149,7 +154,7 @@ export class Game extends EventEmitter{
         this.sendTurn()
     }
 
-    sendTurn(){
+    sendTurn() {
         // tell both players whose move it is
         this.player1.send(JSON.stringify({
             type: TURN,
@@ -166,8 +171,8 @@ export class Game extends EventEmitter{
         }))
     }
 
-    sendGameOver(isDraw:boolean = false,message:string = ""){
-        if(isDraw){
+    sendGameOver(isDraw: boolean = false, message: string = "") {
+        if (isDraw) {
             this.player1.send(JSON.stringify({
                 type: GAME_OVER,
                 payload: {
@@ -201,26 +206,26 @@ export class Game extends EventEmitter{
             }))
         }
 
-        this.emit('gameOver',this.player1,this.player2)
+        this.emit('gameOver', this.player1, this.player2)
     }
 
-    handleTimeout(data:{player:string}){
+    handleTimeout(data: { player: string }) {
         this.player1.send(JSON.stringify({
             type: GAME_OVER,
             payload: {
-                winner: data.player==='w'?'b':'w',
-                message:"by Timeout"
+                winner: data.player === 'w' ? 'b' : 'w',
+                message: "by Timeout"
             }
         }))
 
         this.player2.send(JSON.stringify({
             type: GAME_OVER,
             payload: {
-                winner: data.player==='b'?'w':'b',
-                message:"by Timeout"
+                winner: data.player === 'b' ? 'w' : 'b',
+                message: "by Timeout"
             }
         }))
 
-        this.emit('gameOver',this.player1,this.player2)
+        this.emit('gameOver', this.player1, this.player2)
     }
 }

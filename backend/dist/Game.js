@@ -45,9 +45,11 @@ class Game extends ws_1.EventEmitter {
             return;
         }
         try {
+            console.log("?????????????making move", move);
             this.board.move(move);
         }
         catch (e) {
+            console.log("Invalid move", e);
             if (this.moveCount % 2 === 0) {
                 this.player1.send(JSON.stringify({
                     type: messages_1.INVALID_MOVE,
@@ -56,6 +58,7 @@ class Game extends ws_1.EventEmitter {
                         error: e
                     }
                 }));
+                console.log('invalid move msg sent');
             }
             else {
                 this.player2.send(JSON.stringify({
@@ -65,6 +68,7 @@ class Game extends ws_1.EventEmitter {
                         error: e
                     }
                 }));
+                console.log('invalid move msg sent');
             }
             return;
         }
