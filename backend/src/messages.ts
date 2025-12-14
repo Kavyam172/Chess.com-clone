@@ -5,3 +5,4 @@ export const MOVE_INFO = "move_info";
 export const TURN = "turn";
 export const INVALID_MOVE = "invalid_move";
 export const TIMEOUT = "timeout";
+export const CLOCK_HEARTBEAT = "clock_heartbeat";

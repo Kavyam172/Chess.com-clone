@@ -27,7 +27,7 @@ export const Chessboard = ({ board, socket, color, check }: {
                 return;
             }
             else {
-                socket.send(JSON.stringify({ type: MOVE, payload: { move: { from, to } } }))
+                socket.send(JSON.stringify({ type: MOVE, payload: { move: { from, to, clientTimeStamp: Date.now() } } }))
             }
             setFrom(null)
             setTo(null)
@@ -37,7 +37,7 @@ export const Chessboard = ({ board, socket, color, check }: {
 
     useEffect(() => {
         if (promotion) {
-            socket.send(JSON.stringify({ type: MOVE, payload: { move: { from, to, promotion } } }))
+            socket.send(JSON.stringify({ type: MOVE, payload: { move: { from, to, promotion, clientTimeStamp: Date.now() } } }))
             console.log("promotion move sent")
         }
         setPromotionMenu(false)

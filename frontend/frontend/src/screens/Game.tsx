@@ -14,6 +14,7 @@ export const GAME_OVER = "game_over"
 export const INVALID_MOVE = "invalid_move"
 export const TURN = "turn"
 export const TIMEOUT = "timeout"
+export const CLOCK_HEARTBEAT = "clock_heartbeat"
 
 
 export const Game = () => {
@@ -25,7 +26,10 @@ export const Game = () => {
     const [color, setColor] = useState(null)
     const [findingGame, setFindingGame] = useState(false)
     const [turn, setTurn] = useState(null)
-    const [time, setTime] = useState(10 * 60 * 1000)
+    const [time, setTime] = useState({
+        whiteTime: 10 * 60 * 1000,
+        blackTime: 10 * 60 * 1000,
+    })
     const [gameOver, setGameOver] = useState(false)
     const [isDraw, setDraw] = useState(false)
     const [winner, setWinner] = useState(null)
@@ -48,7 +52,10 @@ export const Game = () => {
                     console.log("Game started with board", data.payload.board)
                     console.log('game started with time', data.payload)
                     setColor(data.payload.color)
-                    setTime(data.payload.time)
+                    setTime({
+                        whiteTime: data.payload.whiteTime,
+                        blackTime: data.payload.blackTime,
+                    })
                     setStarted(true)
                     setFindingGame(false)
                     setCheck(null)
@@ -58,7 +65,12 @@ export const Game = () => {
                     const move = data.payload.move
                     setBoard(data.payload.board)
                     setCheck(data.payload.check)
+                    console.log("move message:::", data.payload)
                     console.log("Move: ", move)
+                    setTime({
+                        whiteTime: data.payload.whiteTime,
+                        blackTime: data.payload.blackTime,
+                    })
                     break
                 case GAME_OVER:
                     console.log("Game Over", data.payload)
@@ -75,6 +87,13 @@ export const Game = () => {
                 case TURN:
                     console.log("Turn: ", data.payload.turn)
                     setTurn(data.payload.turn)
+                    break
+                case CLOCK_HEARTBEAT:
+                    console.log("Clock Heartbeat: ", data.payload)
+                    setTime({
+                        whiteTime: data.payload.whiteTime,
+                        blackTime: data.payload.blackTime,
+                    })
                     break
             }
         }

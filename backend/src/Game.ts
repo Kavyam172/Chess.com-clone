@@ -1,32 +1,38 @@
 
 import { Chess } from "chess.js";
 import { EventEmitter, WebSocket } from "ws";
-import { GAME_OVER, INIT_GAME, INVALID_MOVE, MOVE, MOVE_INFO, TURN } from "./messages";
+import { CLOCK_HEARTBEAT, GAME_OVER, INIT_GAME, INVALID_MOVE, MOVE, MOVE_INFO, TURN } from "./messages";
 
 export class Game extends EventEmitter {
     public player1: WebSocket
     public player2: WebSocket
     public board: Chess
-    private startTime: Date
     private moveCount = 0
+    private whiteTime = 10 * 60 * 1000
+    private blackTime = 10 * 60 * 1000
+    private serverTimeStamp: number
 
-    constructor(player1: WebSocket, player2: WebSocket) {
+    constructor(player1: WebSocket, player2: WebSocket, initialTime: number = 10 * 60 * 1000) {
         super();
         this.player1 = player1;
         this.player2 = player2;
         this.board = new Chess();
-        this.startTime = new Date();
-        this.startGame()
+        this.serverTimeStamp = Date.now();
+        this.startGame(initialTime)
     }
 
-    startGame() {
+    startGame(initialTime: number) {
+        this.whiteTime = initialTime
+        this.blackTime = initialTime
+        this.serverTimeStamp = Date.now();
         this.player1.send(JSON.stringify({
             type: INIT_GAME,
             payload: {
                 color: "w",
                 opponent: this.player2,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }))
         this.player2.send(JSON.stringify({
@@ -35,7 +41,8 @@ export class Game extends EventEmitter {
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }))
         this.sendTurn()
@@ -46,9 +53,10 @@ export class Game extends EventEmitter {
         from: string,
         to: string,
         promotion?: string
+        clientTimeStamp: number
     }) {
-        //validate type of move using zod
 
+        console.log("recieved move msg:::::::", move)
         if (this.moveCount % 2 === 0 && socket !== this.player1) {
             return
         }
@@ -56,6 +64,7 @@ export class Game extends EventEmitter {
         if (this.moveCount % 2 === 1 && socket !== this.player2) {
             return
         }
+
 
         try {
             console.log("?????????????making move", move)
@@ -109,19 +118,6 @@ export class Game extends EventEmitter {
             }
         }
 
-        // if(this.moveCount % 2 === 0){
-        //     this.player2.send(JSON.stringify({
-        //         type: MOVE,
-        //         payload:move
-        //     }))
-        // }
-        // else{
-        //     this.player1.send(JSON.stringify({
-        //         type: MOVE,
-        //         payload:move
-        //     }))
-        // }
-
         let check = null;
         if (this.board.isCheck()) {
             if (this.board.turn() === "w") {
@@ -132,21 +128,43 @@ export class Game extends EventEmitter {
             }
         }
 
+        let now = Date.now();
+        let lag = now - move.clientTimeStamp;
+
+        let effectiveLag = Math.min(lag, 200);
+
+        let timeTaken = now - this.serverTimeStamp - effectiveLag;
+        if (socket === this.player1) {
+            this.whiteTime -= timeTaken;
+        }
+        else {
+            this.blackTime -= timeTaken;
+        }
+
+        this.serverTimeStamp = now;
+
+
+        const { clientTimeStamp, ...moveData } = move;
+
         this.player1.send(JSON.stringify({
             type: MOVE,
             payload: {
-                move,
+                move: moveData,
                 board: this.board.board(),
-                check
+                check,
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }))
 
         this.player2.send(JSON.stringify({
             type: MOVE,
             payload: {
-                move,
+                move: moveData,
                 board: this.board.board(),
-                check
+                check,
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }))
         this.moveCount++;
@@ -155,7 +173,6 @@ export class Game extends EventEmitter {
     }
 
     sendTurn() {
-        // tell both players whose move it is
         this.player1.send(JSON.stringify({
             type: TURN,
             payload: {
@@ -227,5 +244,26 @@ export class Game extends EventEmitter {
         }))
 
         this.emit('gameOver', this.player1, this.player2)
+    }
+
+    handleClockHeartbeat(player: WebSocket, data: { turn: string, clientTimeStamp: number }) {
+        let now = Date.now();
+        let lag = now - data.clientTimeStamp;
+        let effectiveLag = Math.min(lag, 200);
+        let timeTaken = now - data.clientTimeStamp - effectiveLag;
+        if (data.turn === 'w') {
+            this.whiteTime -= timeTaken;
+        }
+        else {
+            this.blackTime -= timeTaken;
+        }
+        this.serverTimeStamp = now;
+        player.send(JSON.stringify({
+            type: CLOCK_HEARTBEAT,
+            payload: {
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime
+            }
+        }))
     }
 }

@@ -1,27 +1,44 @@
 "use strict";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Game = void 0;
 const chess_js_1 = require("chess.js");
 const ws_1 = require("ws");
 const messages_1 = require("./messages");
 class Game extends ws_1.EventEmitter {
-    constructor(player1, player2) {
+    constructor(player1, player2, initialTime = 10 * 60 * 1000) {
         super();
         this.moveCount = 0;
+        this.whiteTime = 10 * 60 * 1000;
+        this.blackTime = 10 * 60 * 1000;
         this.player1 = player1;
         this.player2 = player2;
         this.board = new chess_js_1.Chess();
-        this.startTime = new Date();
-        this.startGame();
+        this.serverTimeStamp = Date.now();
+        this.startGame(initialTime);
     }
-    startGame() {
+    startGame(initialTime) {
+        this.whiteTime = initialTime;
+        this.blackTime = initialTime;
+        this.serverTimeStamp = Date.now();
         this.player1.send(JSON.stringify({
             type: messages_1.INIT_GAME,
             payload: {
                 color: "w",
                 opponent: this.player2,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }));
         this.player2.send(JSON.stringify({
@@ -30,14 +47,15 @@ class Game extends ws_1.EventEmitter {
                 color: "b",
                 opponent: this.player1,
                 board: this.board.board(),
-                time: 10 * 60 * 1000
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }));
         this.sendTurn();
         this.emit('gameStarted');
     }
     makeMove(socket, move) {
-        //validate type of move using zod
+        console.log("recieved move msg:::::::", move);
         if (this.moveCount % 2 === 0 && socket !== this.player1) {
             return;
         }
@@ -93,18 +111,6 @@ class Game extends ws_1.EventEmitter {
                 this.sendGameOver(false, "by Checkmate");
             }
         }
-        // if(this.moveCount % 2 === 0){
-        //     this.player2.send(JSON.stringify({
-        //         type: MOVE,
-        //         payload:move
-        //     }))
-        // }
-        // else{
-        //     this.player1.send(JSON.stringify({
-        //         type: MOVE,
-        //         payload:move
-        //     }))
-        // }
         let check = null;
         if (this.board.isCheck()) {
             if (this.board.turn() === "w") {
@@ -114,27 +120,42 @@ class Game extends ws_1.EventEmitter {
                 check = this.board.findPiece({ type: "k", color: "b" });
             }
         }
+        let now = Date.now();
+        let lag = now - move.clientTimeStamp;
+        let effectiveLag = Math.min(lag, 200);
+        let timeTaken = now - this.serverTimeStamp - effectiveLag;
+        if (socket === this.player1) {
+            this.whiteTime -= timeTaken;
+        }
+        else {
+            this.blackTime -= timeTaken;
+        }
+        this.serverTimeStamp = now;
+        const { clientTimeStamp } = move, moveData = __rest(move, ["clientTimeStamp"]);
         this.player1.send(JSON.stringify({
             type: messages_1.MOVE,
             payload: {
-                move,
+                move: moveData,
                 board: this.board.board(),
-                check
+                check,
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }));
         this.player2.send(JSON.stringify({
             type: messages_1.MOVE,
             payload: {
-                move,
+                move: moveData,
                 board: this.board.board(),
-                check
+                check,
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime,
             }
         }));
         this.moveCount++;
         this.sendTurn();
     }
     sendTurn() {
-        // tell both players whose move it is
         this.player1.send(JSON.stringify({
             type: messages_1.TURN,
             payload: {
@@ -199,6 +220,26 @@ class Game extends ws_1.EventEmitter {
             }
         }));
         this.emit('gameOver', this.player1, this.player2);
+    }
+    handleClockHeartbeat(player, data) {
+        let now = Date.now();
+        let lag = now - data.clientTimeStamp;
+        let effectiveLag = Math.min(lag, 200);
+        let timeTaken = now - data.clientTimeStamp - effectiveLag;
+        if (data.turn === 'w') {
+            this.whiteTime -= timeTaken;
+        }
+        else {
+            this.blackTime -= timeTaken;
+        }
+        this.serverTimeStamp = now;
+        player.send(JSON.stringify({
+            type: messages_1.CLOCK_HEARTBEAT,
+            payload: {
+                whiteTime: this.whiteTime,
+                blackTime: this.blackTime
+            }
+        }));
     }
 }
 exports.Game = Game;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TIMEOUT = exports.INVALID_MOVE = exports.TURN = exports.MOVE_INFO = exports.GAME_OVER = exports.MOVE = exports.INIT_GAME = void 0;
+exports.CLOCK_HEARTBEAT = exports.TIMEOUT = exports.INVALID_MOVE = exports.TURN = exports.MOVE_INFO = exports.GAME_OVER = exports.MOVE = exports.INIT_GAME = void 0;
 exports.INIT_GAME = "init_game";
 exports.MOVE = "move";
 exports.GAME_OVER = "game_over";
@@ -8,3 +8,4 @@ exports.MOVE_INFO = "move_info";
 exports.TURN = "turn";
 exports.INVALID_MOVE = "invalid_move";
 exports.TIMEOUT = "timeout";
+exports.CLOCK_HEARTBEAT = "clock_heartbeat";

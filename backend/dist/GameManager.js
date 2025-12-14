@@ -33,6 +33,7 @@ class GameManager {
     addHandler(socket) {
         socket.on('message', (data) => {
             const message = JSON.parse(data.toString());
+            console.log(">>>>>>>>>>>Message: ", message);
             if (message.type === messages_1.INIT_GAME) {
                 if (this.pendingUser) {
                     const game = new Game_1.Game(this.pendingUser, socket);
@@ -54,6 +55,12 @@ class GameManager {
                 const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
                 if (game) {
                     game.handleTimeout(message.payload);
+                }
+            }
+            if (message.type === messages_1.CLOCK_HEARTBEAT) {
+                const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+                if (game) {
+                    game.handleClockHeartbeat(socket, message.payload);
                 }
             }
         });
